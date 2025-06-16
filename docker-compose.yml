@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: weather_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - weather_network
+
+  php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: weather_php
+    volumes:
+      - ./:/var/www
+    environment:
+      - PHP_IDE_CONFIG=serverName=weather-app
+    networks:
+      - weather_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: weather_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: weather_db
+      MYSQL_USER: weather_user
+      MYSQL_PASSWORD: weather_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - weather_network
+
+  mysql_test:
+    image: mysql:8.0
+    container_name: weather_mysql_test
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: weather_db_test
+      MYSQL_USER: weather_user
+      MYSQL_PASSWORD: weather_pass
+    tmpfs:
+      - /var/lib/mysql
+    networks:
+      - weather_network
+
+networks:
+  weather_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
