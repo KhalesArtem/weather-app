@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Dashboard{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">Weather App Test Dashboard</h1>
+    
+    <div class="row">
+        <!-- Database Tests -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Database Tests</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary test-btn" data-url="{{ path('test_database') }}">
+                            Test Database Connection
+                        </button>
+                        <button class="btn btn-info test-btn" data-url="{{ path('test_populate') }}">
+                            Populate Test Data
+                        </button>
+                        <button class="btn btn-warning test-btn" data-url="{{ path('test_cache_clean') }}">
+                            Clean All Cache
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Tests -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">API Tests</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary test-btn" data-url="{{ path('test_api_key') }}">
+                            Check API Key Configuration
+                        </button>
+                        <button class="btn btn-success test-btn" data-url="{{ path('test_weather', {'city': 'London'}) }}">
+                            Test Weather Fetch (London)
+                        </button>
+                        <button class="btn btn-secondary test-btn" data-url="{{ path('test_logs') }}">
+                            Generate Test Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cache Tests -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Cache Tests</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary test-btn" data-url="{{ path('test_cache_create') }}">
+                            Create Test Cache Entry
+                        </button>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="cityInput" placeholder="City name" value="London">
+                            <button class="btn btn-info" id="checkCacheBtn">
+                                Check Cache
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ path('app_weather_show', {'city': 'London'}) }}" class="list-group-item list-group-item-action">
+                            Weather Page (London)
+                        </a>
+                        <a href="{{ path('api_weather_get', {'city': 'London'}) }}" class="list-group-item list-group-item-action" target="_blank">
+                            API Endpoint (London)
+                        </a>
+                        <a href="{{ path('api_weather_cache_stats') }}" class="list-group-item list-group-item-action" target="_blank">
+                            Cache Statistics API
+                        </a>
+                        <a href="/_profiler" class="list-group-item list-group-item-action" target="_blank">
+                            Symfony Profiler
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Display -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Test Results</h5>
+        </div>
+        <div class="card-body">
+            <pre id="results" class="bg-light p-3 rounded">Click a test button to see results...</pre>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resultsDiv = document.getElementById('results');
+    
+    // Handle test buttons
+    document.querySelectorAll('.test-btn').forEach(button => {
+        button.addEventListener('click', async function() {
+            const url = this.dataset.url;
+            resultsDiv.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                resultsDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultsDiv.textContent = 'Error: ' + error.message;
+            }
+        });
+    });
+    
+    // Handle cache check
+    document.getElementById('checkCacheBtn').addEventListener('click', async function() {
+        const city = document.getElementById('cityInput').value;
+        const url = `{{ path('test_cache_check', {'city': '__CITY__'}) }}`.replace('__CITY__', city);
+        resultsDiv.textContent = 'Loading...';
+        
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            resultsDiv.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+            resultsDiv.textContent = 'Error: ' + error.message;
+        }
+    });
+});
+</script>
+
+<style>
+    #results {
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
