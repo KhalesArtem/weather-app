@@ -15,11 +15,18 @@
         <ini name="error_reporting" value="-1" />
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
+        <!-- Force test database connection -->
+        <env name="DATABASE_URL" value="mysql://weather_user:weather_pass@mysql_test:3306/weather_db_test?serverVersion=8.0&amp;charset=utf8mb4" force="true" />
+        <!-- Disable deprecation helper during tests -->
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled" />
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>tests</directory>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Functional">
+            <directory>tests/Functional</directory>
         </testsuite>
     </testsuites>
 

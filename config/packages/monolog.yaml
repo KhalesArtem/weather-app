@@ -1,6 +1,7 @@
 monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - weather # Custom channel for weather-related logs
 
 when@dev:
     monolog:
@@ -9,7 +10,15 @@ when@dev:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
-                channels: ["!event"]
+                channels: ["!event", "!weather"]
+            
+            weather:
+                type: stream
+                path: "%kernel.logs_dir%/weather_%kernel.environment%.log"
+                level: debug
+                channels: ["weather"]
+                formatter: monolog.formatter.line
+            
             # uncomment to get logging in your browser
             # you may have to allow bigger header sizes in your Web server configuration
             #firephp:
@@ -31,11 +40,17 @@ when@test:
                 action_level: error
                 handler: nested
                 excluded_http_codes: [404, 405]
-                channels: ["!event"]
+                channels: ["!event", "!weather"]
             nested:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
+            
+            weather:
+                type: stream
+                path: "%kernel.logs_dir%/weather_%kernel.environment%.log"
+                level: debug
+                channels: ["weather"]
 
 when@prod:
     monolog:
@@ -46,11 +61,21 @@ when@prod:
                 handler: nested
                 excluded_http_codes: [404, 405]
                 buffer_size: 50 # How many messages should be saved? Prevent memory leaks
+                channels: ["!weather"]
             nested:
                 type: stream
                 path: php://stderr
                 level: debug
                 formatter: monolog.formatter.json
+            
+            weather:
+                type: rotating_file
+                path: "%kernel.logs_dir%/weather_%kernel.environment%.log"
+                level: info
+                channels: ["weather"]
+                max_files: 10
+                formatter: monolog.formatter.json
+            
             console:
                 type: console
                 process_psr_3_messages: false

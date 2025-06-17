@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Weather Error - {{ city }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- Search Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="post" action="{{ path('weather_show', {'city': 'London'}) }}" class="row g-3">
+                        <div class="col-auto flex-grow-1">
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="city" 
+                                   placeholder="Enter city name..." 
+                                   value=""
+                                   required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Error {{ status_code }}</h4>
+                <p>{{ error }}</p>
+                <hr>
+                <p class="mb-0">
+                    {% if status_code == 404 %}
+                        The city "{{ city }}" was not found. Please check the spelling and try again.
+                    {% elseif status_code == 429 %}
+                        API rate limit exceeded. Please try again later.
+                    {% elseif status_code == 503 %}
+                        The weather service is temporarily unavailable. Please try again later.
+                    {% else %}
+                        An error occurred while fetching weather data. Please try again.
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Suggestions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Try these cities</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ path('weather_show', {'city': 'London'}) }}" class="list-group-item list-group-item-action">
+                            London, United Kingdom
+                        </a>
+                        <a href="{{ path('weather_show', {'city': 'New York'}) }}" class="list-group-item list-group-item-action">
+                            New York, United States
+                        </a>
+                        <a href="{{ path('weather_show', {'city': 'Tokyo'}) }}" class="list-group-item list-group-item-action">
+                            Tokyo, Japan
+                        </a>
+                        <a href="{{ path('weather_show', {'city': 'Paris'}) }}" class="list-group-item list-group-item-action">
+                            Paris, France
+                        </a>
+                        <a href="{{ path('weather_show', {'city': 'Sydney'}) }}" class="list-group-item list-group-item-action">
+                            Sydney, Australia
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

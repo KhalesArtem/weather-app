@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Weather in {{ city }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- Search Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="post" action="{{ path('weather_show', {'city': city}) }}" class="row g-3">
+                        <div class="col-auto flex-grow-1">
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="city" 
+                                   placeholder="Enter city name..." 
+                                   value="{{ city }}"
+                                   required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ path('weather_show', {'city': city, 'refresh': true}) }}" 
+                               class="btn btn-secondary">
+                                Refresh
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Weather Data -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Weather in {{ weather.city }}, {{ weather.country }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3 class="display-4">{{ weather.temperature }}°C</h3>
+                            <p class="lead">{{ weather.condition }}</p>
+                            {% if weather.icon is defined and weather.icon %}
+                                <img src="{{ weather.icon }}" alt="{{ weather.condition }}" class="weather-icon">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><strong>Humidity:</strong> {{ weather.humidity }}%</li>
+                                <li><strong>Wind Speed:</strong> {{ weather.wind_speed }} km/h</li>
+                                {% if weather.local_time is defined and weather.local_time %}
+                                    <li><strong>Local Time:</strong> {{ weather.local_time }}</li>
+                                {% endif %}
+                                {% if weather.timezone is defined and weather.timezone %}
+                                    <li><strong>Timezone:</strong> {{ weather.timezone }}</li>
+                                {% endif %}
+                                <li><strong>Last Updated:</strong> {{ weather.last_updated }}</li>
+                                <li><strong>API Last Updated:</strong> {{ weather.api_last_updated }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        {% if weather.cached %}
+                            Data from cache ({{ weather.cache_age_minutes }} minutes old)
+                            {% if weather.stale %}
+                                <span class="badge bg-warning">Stale</span>
+                            {% endif %}
+                        {% else %}
+                            Fresh data from API
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Cache Statistics -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Cache Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h6>Total Cached</h6>
+                            <p class="h4">{{ cache_stats.total_cached_cities }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Fresh Entries</h6>
+                            <p class="h4 text-success">{{ cache_stats.fresh_cache_entries }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Stale Entries</h6>
+                            <p class="h4 text-warning">{{ cache_stats.stale_cache_entries }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Max Age</h6>
+                            <p class="h4">{{ cache_stats.cache_max_age_minutes }} min</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Examples -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">API Endpoints</h5>
+                </div>
+                <div class="card-body">
+                    <p>Get weather data (JSON):</p>
+                    <code>GET {{ url('weather_api_get', {'city': city}) }}</code>
+                    
+                    <p class="mt-3">Clear cache for this city:</p>
+                    <code>POST {{ url('weather_api_cache_clear', {'city': city}) }}</code>
+                    
+                    <p class="mt-3">Get cache statistics:</p>
+                    <code>GET {{ url('weather_api_cache_stats') }}</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .weather-icon {
+        width: 64px;
+        height: 64px;
+    }
+</style>
+{% endblock %}

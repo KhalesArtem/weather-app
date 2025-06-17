@@ -1,0 +1,11 @@
+doctrine:
+    dbal:
+        # Use the test database without suffix
+        # The DATABASE_URL already points to weather_db_test
+        dbname_suffix: ''
+        
+        # Use a separate test database connection
+        # This ensures tests don't affect production data
+        options:
+            # Disable foreign key checks for faster fixture loading
+            1002: 'SET foreign_key_checks = 0'
